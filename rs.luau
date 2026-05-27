@@ -6,7 +6,6 @@ local zhub = Instance.new("ScreenGui")
 zhub.Name = "zHub_Spy"
 zhub.Parent = game:GetService("CoreGui")
 
--- иконка
 local icon = Instance.new("ImageButton", zhub)
 icon.Name = "Icon"
 icon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -24,7 +23,6 @@ iconz.TextSize = 30
 iconz.Font = Enum.Font.GothamBold
 iconz.BackgroundTransparency = 1
 
--- основное меню
 local main = Instance.new("Frame", zhub)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 main.BackgroundTransparency = 0.25
@@ -50,7 +48,6 @@ closebtn.Size = UDim2.new(0, 12, 0, 12)
 closebtn.Text = ""
 Instance.new("UICorner", closebtn).CornerRadius = UDim.new(1, 0)
 
--- переключатель spy
 local spy_enabled = false
 local toggleframe = Instance.new("Frame", main)
 toggleframe.BackgroundTransparency = 1
@@ -78,7 +75,6 @@ knob.Position = UDim2.new(0, 2, 0.5, -8)
 knob.Size = UDim2.new(0, 16, 0, 16)
 Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
 
--- контейнер логов
 local logframe = Instance.new("Frame", zhub)
 logframe.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 logframe.BackgroundTransparency = 0.25
@@ -93,11 +89,9 @@ scroll.Position = UDim2.new(0, 5, 0, 5)
 scroll.BackgroundTransparency = 1
 scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 scroll.ScrollBarThickness = 2
-
 local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 5)
 
--- подвал
 local footer = Instance.new("TextLabel", main)
 footer.Size = UDim2.new(1, 0, 0, 20)
 footer.Position = UDim2.new(0, 0, 1, -20)
@@ -171,13 +165,24 @@ local old = mt.__namecall
 setreadonly(mt, false)
 
 mt.__namecall = newcclosure(function(self, ...)
-    local args = {...}
     local method = getnamecallmethod()
+    local args = {...}
     
     if spy_enabled and (method == "FireServer" or method == "InvokeServer") then
-        log(self.Name .. " | " .. tostring(args[1]))
+        local firstArg = "none"
+        if args[1] ~= nil then
+            if type(args[1]) == "table" then
+                firstArg = "{table}"
+            else
+                firstArg = tostring(args[1])
+            end
+        end
+        task.spawn(function()
+            log(self.Name .. " | " .. firstArg)
+        end)
     end
     
     return old(self, ...)
 end)
 setreadonly(mt, true)
+
