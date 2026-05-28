@@ -1,24 +1,21 @@
-local lp = game:GetService("Players").LocalPlayer
+-- Шпион для перехвата данных от сервера
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- UI не трогаю, только логика перехвата
-local function log(msg)
-    print("zHub Spy: " .. tostring(msg))
+-- Функция для прослушивания всех RemoteEvent'ов
+local function spyOnRemote(remote)
+    if remote:IsA("RemoteEvent") then
+        remote.OnClientEvent:Connect(function(...)
+            local args = {...}
+            print("--- ПЕРЕХВАТ СОБЫТИЯ: " .. remote.Name .. " ---")
+            for i, v in pairs(args) do
+                print("Аргумент " .. i .. ": " .. tostring(v))
+            end
+        end)
+    end
 end
 
-local mt = getrawmetatable(game)
-local old = mt.__namecall
-setreadonly(mt, false)
-
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    
-    if method == "FireServer" or method == "InvokeServer" or method == "fireServer" then
-        log("NAME: " .. self.Name .. " | CLASS: " .. self.ClassName)
-    end
-    
-    return old(self, ...)
-end)
-
-setreadonly(mt, true)
-log("Spy Active. Press Upgrade in game.")
+-- Сканируем ReplicatedStorage на наличие событий
+for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
+    spyOnRemote(obj)
+end
 
